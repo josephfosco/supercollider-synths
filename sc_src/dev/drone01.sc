@@ -26,18 +26,20 @@ SynthDef("drone01", {|
                 mul: vol ,
             ) +
             VarSaw.ar(
-                freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-                mul: vol/2,
-            ) +
-            VarSaw.ar(
-                freq: Lag.kr(3*freq * SinOsc.kr(LFNoise.kr(1)).range(0.99,1.01),1),
+                freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
                 width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
                 mul: vol/3,
             )
+		+
+		VarSaw.ar(
+		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+		mul: vol/2,
+		)
         );
 
-	snd = RLPF.ar(in: snd, freq: LFNoise1.kr(100).range(freq*2, freq*3), rq: 1.0);
+	snd = RLPF.ar(in: snd, freq: Lag.ar(in: LFNoise0.ar(freq: 0.2).range(freq, freq * 5), lagTime: 3.0), rq: 0.2);
+
 
         // spread the signal
 	    snd = Splay.ar(snd);
@@ -55,8 +57,6 @@ SynthDef("drone01", {|
 
 a=Synth("drone01")
 
-
-a=Synth("drone01")
 
 plotTree(s)
 
