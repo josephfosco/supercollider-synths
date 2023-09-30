@@ -20,29 +20,24 @@ SynthDef("drone01", {|
 
         // the drone zone!
 	snd = Mix.ar(
-		PMOsc.ar(
-			carfreq: freq,
-			modfreq: freq + 15,
-			pmindex: Lag.kr((LFNoise0.kr(110)).range(0,20),5),
-			mul: vol,
-		)
-
-            // VarSaw.ar(
-            //     freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-            //     width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-            //     mul: vol ,
-            // ) +
-            // VarSaw.ar(
-            //     freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-            //     width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-            //     mul: vol/2,
-            // ) +
-            // VarSaw.ar(
-            //     freq: Lag.kr(4*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-            //     width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-            //     mul: vol/4,
-            // )
+            VarSaw.ar(
+                freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+                mul: vol ,
+            ) +
+            VarSaw.ar(
+                freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+                mul: vol/2,
+            ) +
+            VarSaw.ar(
+                freq: Lag.kr(3*freq * SinOsc.kr(LFNoise.kr(1)).range(0.99,1.01),1),
+                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+                mul: vol/3,
+            )
         );
+
+	snd = RLPF.ar(in: snd, freq: LFNoise1.kr(100).range(freq*2, freq*3), rq: 1.0);
 
         // spread the signal
 	    snd = Splay.ar(snd);
@@ -57,6 +52,9 @@ SynthDef("drone01", {|
     }
 ).add;
 )
+
+a=Synth("drone01")
+
 
 a=Synth("drone01")
 
