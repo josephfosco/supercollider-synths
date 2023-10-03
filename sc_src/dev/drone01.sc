@@ -38,7 +38,7 @@ SynthDef("drone01", {|
 		) / 2
         ) / 2;
 
-	snd = RLPF.ar(in: snd, freq: Lag.ar(in: LFNoise0.ar(freq: 0.2).range(freq, freq * 5), lagTime: 3.0), rq: 0.2);
+	snd = RLPF.ar(in: snd, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
 
 
         // spread the signal
@@ -46,8 +46,8 @@ SynthDef("drone01", {|
 
         // pan
         snd = Balance2.ar(snd[0] ,snd[1],SinOsc.kr(
-            LFNoise0.kr(0.1).range(0.05,0.2)
-        )*0.1);
+            LFNoise0.kr(0.1)
+        )*0.5);
 
         // make sound!
         Out.ar(0,snd);
@@ -62,6 +62,77 @@ a=Synth("drone01")
 plotTree(s)
 
 // .writeDefFile("/home/joseph/src/clj/splice/src/splice/instr/instruments/sc/");
+
+
+
+
+(
+SynthDef("drone01", {|
+        freq=110, vol=0.5, pan=0|
+        var snd, snd1, snd2, snd3, panOsc;
+
+        // the drone zone!
+    snd1 = VarSaw.ar(
+                freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+                mul: vol ,
+            ) / 2;
+    snd2 = VarSaw.ar(
+                freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+                mul: vol/3,
+            ) / 2;
+
+	snd3 = VarSaw.ar(
+		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+		mul: vol/2,
+		) / 2;
+
+	// snd1 = RLPF.ar(in: snd1, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
+	// snd2 = RLPF.ar(in: snd2, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
+	// snd2 = RLPF.ar(in: snd3, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
+
+
+	// spread the signal
+	snd1 = Splay.ar(snd1);
+	snd2 = Splay.ar(snd2);
+	snd3 = Splay.ar(snd3);
+
+	// pan
+	// snd = Mix.ar(
+	// 	Balance2.ar(snd1, snd1,SinOsc.kr(0.5))
+	// 	+
+	// 	Balance2.ar(snd2 ,snd2,SinOsc.kr(LFNoise0.kr(0.1))*0.5)
+	// 	+
+	// 	Balance2.ar(snd3 ,snd3,SinOsc.kr(LFNoise0.kr(0.1))*0.5)
+	// );
+	panOsc = SinOsc.kr(0.5);
+	snd = Mix.ar(
+		Balance2.ar(snd1, snd1,panOsc)
+		+
+		Balance2.ar(snd2 ,snd2,panOsc)
+		+
+		Balance2.ar(snd3 ,snd3,panOsc)
+	);
+
+        // make sound!
+	Out.ar(0,snd);
+    }
+).add;
+)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // play({ PMOsc.ar(110, 115, Line.ar(0,20,8), 0, 0.1) }); // modulate index
