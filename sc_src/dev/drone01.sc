@@ -16,104 +16,38 @@
 (
 SynthDef("drone01", {|
         freq=110, vol=0.5, pan=0|
-        var snd;
-
-        // the drone zone!
-	snd = Mix.ar(
-            VarSaw.ar(
-                freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-                mul: vol ,
-            ) / 2 +
-            VarSaw.ar(
-                freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-                mul: vol/3,
-            ) / 2
-		+
-		VarSaw.ar(
-		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-		mul: vol/2,
-		) / 2
-        ) / 2;
-
-	snd = RLPF.ar(in: snd, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
-
-
-        // spread the signal
-	    snd = Splay.ar(snd);
-
-        // pan
-        snd = Balance2.ar(snd[0] ,snd[1],SinOsc.kr(
-            LFNoise0.kr(0.1)
-        )*0.5);
-
-        // make sound!
-        Out.ar(0,snd);
-    }
-).add;
-)
-
-a=Synth("drone01")
-
-
-
-plotTree(s)
-
-// .writeDefFile("/home/joseph/src/clj/splice/src/splice/instr/instruments/sc/");
-
-
-
-
-(
-SynthDef("drone01", {|
-        freq=110, vol=0.5, pan=0|
-        var snd, snd1, snd2, snd3, panOsc;
+        var snd, snd1, snd2, snd3, lpfFreq;
 
         // the drone zone!
     snd1 = VarSaw.ar(
                 freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
                 width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
                 mul: vol ,
-            ) / 2;
+            ) / 3;
     snd2 = VarSaw.ar(
                 freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
                 width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
                 mul: vol/3,
-            ) / 2;
+            ) / 3;
 
 	snd3 = VarSaw.ar(
 		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
 		mul: vol/2,
-		) / 2;
+		) / 3;
 
-	// snd1 = RLPF.ar(in: snd1, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
-	// snd2 = RLPF.ar(in: snd2, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
-	// snd2 = RLPF.ar(in: snd3, freq: Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0), rq: 0.2);
+	lpfFreq = Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0);
+	snd1 = RLPF.ar(in: snd1, freq: lpfFreq, rq: 0.2);
+	snd2 = RLPF.ar(in: snd2, freq: lpfFreq, rq: 0.2);
+	snd3 = RLPF.ar(in: snd3, freq: lpfFreq, rq: 0.2);
 
 
-	// spread the signal
-	snd1 = Splay.ar(snd1);
-	snd2 = Splay.ar(snd2);
-	snd3 = Splay.ar(snd3);
-
-	// pan
-	// snd = Mix.ar(
-	// 	Balance2.ar(snd1, snd1,SinOsc.kr(0.5))
-	// 	+
-	// 	Balance2.ar(snd2 ,snd2,SinOsc.kr(LFNoise0.kr(0.1))*0.5)
-	// 	+
-	// 	Balance2.ar(snd3 ,snd3,SinOsc.kr(LFNoise0.kr(0.1))*0.5)
-	// );
-	panOsc = SinOsc.kr(0.5);
 	snd = Mix.ar(
-		Balance2.ar(snd1, snd1,panOsc)
-		+
-		Balance2.ar(snd2 ,snd2,panOsc)
-		+
-		Balance2.ar(snd3 ,snd3,panOsc)
+		[
+		Pan2.ar(snd1, Lag.ar(in: LFNoise0.ar(freq: 0.15, mul: 0.9), lagTime: 3.0)),
+			Pan2.ar(snd2, Lag.ar(in: LFNoise0.ar(freq: 0.17, mul: 0.7), lagTime: 3.0)),
+			Pan2.ar(snd3, Lag.ar(in: LFNoise0.ar(freq: 0.1, mul: 0.8), lagTime: 3.0))
+		]
 	);
 
         // make sound!
@@ -121,16 +55,13 @@ SynthDef("drone01", {|
     }
 ).add;
 )
+a=Synth("drone01")
 
 
 
+plotTree(s)
 
-
-
-
-
-
-
+// .writeDefFile("/home/joseph/src/clj/splice/src/splice/instr/instruments/sc/");
 
 
 
