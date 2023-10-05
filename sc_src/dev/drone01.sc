@@ -15,26 +15,29 @@
 
 (
 SynthDef("drone01", {|
-        freq=110, vol=0.5, pan=0|
-        var snd, snd1, snd2, snd3, lpfFreq;
+    freq=110, vol=0.5, pan=0, attack = 1.0, sustain = 0.75, release = 3,
+	gate = 1.0, done = 2, out = 0 |
+    var env, snd, snd1, snd2, snd3, lpfFreq;
 
-        // the drone zone!
+	env = Linen.kr(attackTime: attack, susLevel: sustain, releaseTime: release,
+		           gate: gate, doneAction: done);
+
     snd1 = VarSaw.ar(
-                freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-                mul: vol ,
-            ) / 3;
+		freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+		mul: vol ,
+	) / 3;
     snd2 = VarSaw.ar(
-                freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
-                width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-                mul: vol/3,
-            ) / 3;
+		freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
+		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
+		mul: vol/3,
+	) / 3;
 
 	snd3 = VarSaw.ar(
 		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
 		mul: vol/2,
-		) / 3;
+	) / 3;
 
 	lpfFreq = Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0);
 	snd1 = RLPF.ar(in: snd1, freq: lpfFreq, rq: 0.2);
@@ -43,52 +46,22 @@ SynthDef("drone01", {|
 
 
 	snd = Mix.ar(
-		[
-		Pan2.ar(snd1, Lag.ar(in: LFNoise0.ar(freq: 0.15, mul: 0.9), lagTime: 3.0)),
-			Pan2.ar(snd2, Lag.ar(in: LFNoise0.ar(freq: 0.17, mul: 0.7), lagTime: 3.0)),
-			Pan2.ar(snd3, Lag.ar(in: LFNoise0.ar(freq: 0.1, mul: 0.8), lagTime: 3.0))
-		]
-	);
+	    [
+	        Pan2.ar(snd1, Lag.ar(in: LFNoise0.ar(freq: 0.15, mul: 0.9), lagTime: 3.0)),
+		    Pan2.ar(snd2, Lag.ar(in: LFNoise0.ar(freq: 0.17, mul: 0.7), lagTime: 3.0)),
+		    Pan2.ar(snd3, Lag.ar(in: LFNoise0.ar(freq: 0.1, mul: 0.8), lagTime: 3.0))
+	    ]
+	) * env;
 
-        // make sound!
-	Out.ar(0,snd);
+    // make sound!
+	Out.ar(out,snd);
     }
 ).add;
 )
+
 a=Synth("drone01")
 
+a.set("gate", 0)
 
-
-plotTree(s)
 
 // .writeDefFile("/home/joseph/src/clj/splice/src/splice/instr/instruments/sc/");
-
-
-
-
-// play({ PMOsc.ar(110, 115, Line.ar(0,20,8), 0, 0.1) }); // modulate index
-
-// (
-// SynthDef('drone01', {|
-//     freq = 164.81, vol = 1, pan = 0, clickiness = 0.1, out = 0|
-
-//     var snd, click;
-
-//     // Basic tone is a SinOsc
-//     snd = SinOsc.ar(freq) * EnvGen.ar(Env.perc(0.03, Rand(3.0, 4.0), 1, -7), doneAction: 2);
-//     snd = HPF.ar( LPF.ar(snd, 380), 120);
-//     // The "clicking" sounds are modeled with a bank of resonators excited by enveloped white noise
-//     click = DynKlank.ar(`[
-//         // the resonant frequencies are randomized a little to add variation
-//         // there are two high resonant freqs and one quiet "bass" freq to give it some depth
-//         [240*ExpRand(0.97, 1.02), 2020*ExpRand(0.97, 1.02), 3151*ExpRand(0.97, 1.02)],
-//         [-9, 0, -5].dbamp,
-//         [0.8, 0.07, 0.08]
-//     ], BPF.ar(PinkNoise.ar, 6500, 0.1) * EnvGen.ar(Env.perc(0.001, 0.01))) * clickiness;
-//     snd = (snd*clickiness) + (click*(1-clickiness));
-
-//     snd = Pan2.ar(snd, pan);
-
-//     OffsetOut.ar(out, snd * vol);
-// }).add;
-// )
