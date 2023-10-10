@@ -16,17 +16,21 @@
 (
 SynthDef('flute', {|
     freq = 440, vol = 1.0, pan = 0, attack = 0.15, sustain = 1.0, release = 0.1,
-	gate = 1.0, done = 2, out = 0, modf = 440 |
+	gate = 1.0, done = 2, out = 0, modf = 440, shFreq = 4 |
 
-    var sound, env, snd1, fltr, fmod;
+    var sound, env, snd1, fltr, fmod, sandh, nFreq;
 
 	env = Linen.kr(attackTime: attack, susLevel: sustain, releaseTime: release,
 		           gate: gate, doneAction: done);
 
-	fmod = SinOsc.ar(freq: modf) * 0.7;
-	snd1 = Saw.ar(freq: freq);
+	// fmod = SinOsc.ar(freq: modf) * 0.7;
+	// snd1 = Pulse.ar(freq: freq + LFNoise0.kr(freq: 0.3, mul: 100));
+	snd1 = Pulse.ar(freq: freq);
 
-	snd1 = RLPF.ar( in: snd1, freq: 440, rq: fmod) * 0.5;
+	nFreq = LFNoise0.ar(freq: shFreq, mul: freq, add: freq * 2);
+
+    //snd1 = RLPF.ar( in: snd1, freq: Lag.ar(in: LFNoise0.ar(freq: shFreq, mul: freq/2, add: freq) , lagTime: (1/9)/7 ), rq: 0.4) * 0.5;
+	snd1 = RLPF.ar( in: RLPF.ar(in: snd1, freq: nFreq, rq: 0.5) , freq: nFreq, rq:0.5) * 0.5;
 
 	// sound = RLPF.ar(in: (Saw.ar(freq: freq) * 0.4),
 	// 	freq: ((env * 60) + freq + (SinOsc.ar(3.5) * 40)),
@@ -41,3 +45,4 @@ SynthDef('flute', {|
 a=Synth("flute", [\freq, 220, \modf, 30])
 
 a.set("modf", 40)
+a.set("shFreq", 9)
