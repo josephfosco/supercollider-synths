@@ -21,7 +21,8 @@ SynthDef.new('anasynth', {
     //env = EnvGen.ar(Env.adsr(0.2, 0.2, 0.8, 1), gate: gate, doneAction:2);
     env = EnvGen.ar(Env.perc(0.03, 0.4), gate: gate, doneAction:2);
 	filter = MoogFF.ar(signal * env, ((freq * cutoff) - (freq/4)) + (env * freq/4), gain );
-    Out.ar(out, Pan2.ar(filter, pan));	}
+    Out.ar(out, Pan2.ar(filter, pan));
+}
 ).add;
 )
 
