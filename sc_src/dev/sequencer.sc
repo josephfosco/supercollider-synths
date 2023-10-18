@@ -30,9 +30,13 @@ a=Synth(\seqSynth)
 
 (
 SynthDef(\seqSynth, {
-	arg freqs=[1.0, 2.0];
+
 var a, b, t = Impulse.kr(2), freq1, snd;
-a = { Dseq(freqs, inf) } * 110;
+
+	var freqs = NamedControl.kr(\freqs, [1.0, 2.0, 3.0]);
+
+	a = { Dseq(freqs, inf) } * 110;
+
 freq1=Demand.kr(t, 0, [a]);
 snd=SinOsc.ar(freq: freq1);
 Out.ar(0, snd);
@@ -40,4 +44,5 @@ Out.ar(0, snd);
 }).add
 )
 
-a=Synth(\seqSynth)
+a=Synth(\seqSynth, [\freqs, #[1.0, 2.0, 4.0]])
+a.setn(\freqs, [1.0, 2.0, 3.0])
