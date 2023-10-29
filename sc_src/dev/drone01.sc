@@ -15,9 +15,10 @@
 
 (
 SynthDef("drone01", {|
-    freq=110, vol=0.5, pan=0, attack = 1.0, sustain = 0.75, release = 3,
+    freq=110, vol=0.5, pan=0, attack = 4.0, sustain = 0.75, release = 4.0,
 	gate = 1.0, done = 2, out = 0 |
-    var env, snd, snd1, snd2, snd3, lpfFreq;
+
+    var vol_adjust=0.5, env, sound, snd1, snd2, snd3, lpfFreq;
 
 	env = Linen.kr(attackTime: attack, susLevel: sustain, releaseTime: release,
 		           gate: gate, doneAction: done);
@@ -25,27 +26,24 @@ SynthDef("drone01", {|
     snd1 = VarSaw.ar(
 		freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-		mul: vol ,
 	) / 3;
     snd2 = VarSaw.ar(
 		freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-		mul: vol/3,
 	) / 3;
 
 	snd3 = VarSaw.ar(
 		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-		mul: vol/2,
 	) / 3;
 
 	lpfFreq = Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0);
-	snd1 = RLPF.ar(in: snd1, freq: lpfFreq, rq: 0.2);
-	snd2 = RLPF.ar(in: snd2, freq: lpfFreq, rq: 0.2);
-	snd3 = RLPF.ar(in: snd3, freq: lpfFreq, rq: 0.2);
+	snd1 = RLPF.ar(in: snd1, freq: lpfFreq, rq: 0.2, mul: vol_adjust);
+	snd2 = RLPF.ar(in: snd2, freq: lpfFreq, rq: 0.2, mul: vol_adjust);
+	snd3 = RLPF.ar(in: snd3, freq: lpfFreq, rq: 0.2, mul: vol_adjust);
 
 
-	snd = Mix.ar(
+	sound = Mix.ar(
 	    [
 	        Pan2.ar(snd1, Lag.ar(in: LFNoise0.ar(freq: 0.15, mul: 0.9), lagTime: 3.0)),
 		    Pan2.ar(snd2, Lag.ar(in: LFNoise0.ar(freq: 0.17, mul: 0.7), lagTime: 3.0)),
@@ -53,8 +51,7 @@ SynthDef("drone01", {|
 	    ]
 	) * env;
 
-    // make sound!
-	Out.ar(out,snd);
+	OffsetOut.ar(out,sound * vol);
     }
 ).add;
 )
