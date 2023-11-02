@@ -15,27 +15,31 @@
 
 (
 SynthDef("drone01", {|
-    freq=110, vol=0.5, pan=0, attack = 4.0, sustain = 0.75, release = 4.0,
-	gate = 1.0, done = 2, out = 0 |
+    freq=110, vol=0.9, pan=0, attack=4.0, sustain=0.75, release=4.0,
+	gate = 1.0, done = 2, verbMix=0.6, verbRoom=1.0, verbDamp=0.9, out = 0 |
 
-    var vol_adjust=0.5, env, sound, snd1, snd2, snd3, lpfFreq;
+    var vol_adjust=0.5, envelope, env, sound, snd1, snd2, snd3, lpfFreq;
 
-	env = Linen.kr(attackTime: attack, susLevel: sustain, releaseTime: release,
-		           gate: gate, doneAction: done);
+	// env = Linen.kr(attackTime: attack, susLevel: sustain, releaseTime: release,
+	// gate: gate, doneAction: done);
+
+	// create an envelope that allows time at the end for the reverb tail to fade
+	envelope = Env.new(levels: [0, sustain, 0], times: [attack, release], curve: [\sin, \sin], releaseNode: 1);
+	env = EnvGen.kr(envelope, gate: gate, doneAction: done);
 
     snd1 = VarSaw.ar(
 		freq: Lag.kr(freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-	) / 3;
+	) / 4;
     snd2 = VarSaw.ar(
 		freq: Lag.kr(1.5*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-	) / 3;
+	) / 6;
 
 	snd3 = VarSaw.ar(
 		freq: Lag.kr(2*freq * SinOsc.kr(LFNoise0.kr(1)).range(0.99,1.01),1),
 		width: SinOsc.kr(LFNoise0.kr(1)).range(0.4,0.6),
-	) / 3;
+	) / 5;
 
 	lpfFreq = Lag.ar(in: LFNoise0.ar(freq: 0.1).range(freq, freq * 5), lagTime: 7.0);
 	snd1 = RLPF.ar(in: snd1, freq: lpfFreq, rq: 0.2, mul: vol_adjust);
@@ -51,7 +55,12 @@ SynthDef("drone01", {|
 	    ]
 	) * env;
 
-	OffsetOut.ar(out,sound * vol);
+	// sound = FreeVerb2.ar(in: (sound[0] * vol), in2: (sound[1] * vol),
+	// mix: verbMix, room: verbRoom, damp: verbDamp);
+
+	sound.scope;
+
+	OffsetOut.ar(out, sound);
     }
 ).add;
 )
@@ -60,5 +69,8 @@ a=Synth("drone01")
 
 a.set("gate", 0)
 
+a.set('verbDamp', 1.0)
+a.set('verb.Room', 1.0)
+a.set('verbMox', 0.9)
 
 // .writeDefFile("/home/joseph/src/clj/splice/src/splice/instr/instruments/sc/");
